@@ -1,12 +1,6 @@
 """
 Inspiration: https://github.com/cfedermann/mass-mailer
 
-To do:
-- pylatex instead of fpdf
-- option to attach existing files (referenced in csv or based on name)
-- allow smtp without login
-- switch to yaml / configparser to allow comments inside config file
-
 Resources:
 
 mimetypes
