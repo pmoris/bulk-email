@@ -136,34 +136,42 @@ def load_template(filename):
     return template
 
 
-def send_email(_config, recipient_list, template, alt_template=None):
-    # ask user for smtp password
-    pw = getpass.getpass(prompt="Password: ", stream=None)
-
-    port = int(_config["PORT"])
-    login = _config["LOGIN"]
+def smtp_login(login, port):
     # connect to smtp mail server
     # https://stackoverflow.com/questions/44761676/smtp-ssl-sslerror-ssl-unknown-protocol-unknown-protocol-ssl-c590?rq=1
-    try:
-        if port == 465:
-            server = smtplib.SMTP_SSL(_config["HOST"], port)
-            server.ehlo()
-        else:
-            server = smtplib.SMTP(_config["HOST"], port)
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-    # else:
-    #     raise Exception('Port {} not supported'.format(port))
-    # server.set_debuglevel(1)
-        server.login(login, pw)
-    except:
-        print("Failed to login to smtp server. Please check port number and credentials.")
+    if port == 465:
+        server = smtplib.SMTP_SSL(_config["HOST"], port)
+        server.ehlo()
+    else:
+        server = smtplib.SMTP(_config["HOST"], port)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+
+    for i in range(3):
+        try:
+            pw = getpass.getpass(prompt="Password: ", stream=None)
+            server.login(login, pw)
+            return server
+        except Exception as e:
+            print("Failed to login to smtp server. Please retype password or check port number and credentials.")
+            lastException = e
+            continue
+    else:
+        raise lastException
+
+
+def send_email(_config, recipient_list, template, alt_template=None):
+    port = int(_config["PORT"])
+    login = _config["LOGIN"]
+
+    server = smtp_login(login, port)
 
     # loop through all found recipients
     for recipient in recipient_list:
+
         # avoid overloading smtp server
-        time.sleep(1)
+        time.sleep(5)
 
         # start multipart message
         msg = MIMEMultipart()
