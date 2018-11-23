@@ -221,7 +221,7 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--emails", help=".csv file (, separated) with names (col 1) and emails (col 2)")
     parser.add_argument("-t", "--template", help="email template to use (.html)")
     parser.add_argument("-a", "--alt_template", help="alternative (textual) template to use (.txt)", required=False)
-    parser.add_argument("-o", "--out", help="output folder where to store generated pdfs")
+    parser.add_argument("-o", "--out", help="output folder where to store generated pdfs", required=True)
     args = parser.parse_args()
 
     # retrieve configuration values, template
