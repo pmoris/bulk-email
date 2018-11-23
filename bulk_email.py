@@ -19,7 +19,6 @@ https://www.afternerd.com/blog/how-to-send-an-email-using-python-and-smtplib/
 https://stackabuse.com/how-to-send-emails-with-gmail-using-python/
 """
 
-
 import argparse
 import csv
 import getpass
@@ -32,9 +31,10 @@ from email.mime.text import MIMEText
 from fpdf import FPDF
 from pathlib import Path
 
+
 def load_config(filename):
     _config = {}
-    assert(filename.endswith(".ini"))
+    assert (filename.endswith(".ini"))
     with open(filename) as f:
         for line in f:
             if not line.startswith("#"):
@@ -77,18 +77,18 @@ def create_certificate(recipient, output_folder, _config):
     pdf.set_font("Arial", "B", 25)
     pdf.cell(200, 30, event, 0, 1)
     pdf.set_font("Arial", "", 20)
-    pdf.cell(200, 10, "We hereby certify that",0,1)
-    pdf.set_font("Arial", "B", 20) #bold font for name
-    pdf.cell(160, 30, "{}".format(name),0,1,"C")
+    pdf.cell(200, 10, "We hereby certify that", 0, 1)
+    pdf.set_font("Arial", "B", 20)  #bold font for name
+    pdf.cell(160, 30, "{}".format(name), 0, 1, "C")
     pdf.set_font("Arial", "", 20)
-    pdf.cell(200, 10, "has attended the {} ".format(event),0,1)
-    pdf.cell(200, 10, "organized in {} on {}.".format(location, date),0,1)
-    pdf.cell(200, 50, "On behalf of the organizing committee,",0,1)
-    pdf.cell(200, 40, "",0,1)
-    pdf.cell(200, 10, "{}".format(signing_name),0,1)
-    pdf.cell(200, 10, "{}".format(signing_title),0,1)
-    # pdf.image(logo, x = 10, y = 220, w = 50, h = 50, type="")
-    # pdf.image(signature, x = 10, y = 145, w = 50.1, h = 30, type = "", link = "")
+    pdf.cell(200, 10, "has attended the {} ".format(event), 0, 1)
+    pdf.cell(200, 10, "organized in {} on {}.".format(location, date), 0, 1)
+    pdf.cell(200, 50, "On behalf of the organizing committee,", 0, 1)
+    pdf.cell(200, 40, "", 0, 1)
+    pdf.cell(200, 10, "{}".format(signing_name), 0, 1)
+    pdf.cell(200, 10, "{}".format(signing_title), 0, 1)
+    pdf.image(logo, x=10, y=220, w=50, h=50, type="")
+    pdf.image(signature, x=10, y=145, w=50.1, h=30, type="", link="")
 
     # create output path as: output_folder/FirstLast.pdf
     output_path = Path(output_folder) / "{}.pdf".format(name.replace(" ", ""))
@@ -98,11 +98,11 @@ def create_certificate(recipient, output_folder, _config):
 
 
 class recipient:
-  def __init__(self, first_name, last_name, email):
-    self.last_name = last_name
-    self.first_name = first_name
-    self.email = email
-    self.attachment = None
+    def __init__(self, first_name, last_name, email):
+        self.last_name = last_name
+        self.first_name = first_name
+        self.email = email
+        self.attachment = None
 
 
 def load_recipients(filename):
@@ -125,7 +125,9 @@ def load_recipients(filename):
     with open(filename) as f:
         reader = csv.reader(f, delimiter=",")
         next(reader, None)
-        recipient_list = [recipient(line[0], line[1], line[2]) for line in reader]
+        recipient_list = [
+            recipient(line[0], line[1], line[2]) for line in reader
+        ]
     return recipient_list
 
 
@@ -154,7 +156,9 @@ def smtp_login(login, port):
             server.login(login, pw)
             return server
         except Exception as e:
-            print("Failed to login to smtp server. Please retype password or check port number and credentials.")
+            print(
+                "Failed to login to smtp server. Please retype password or check port number and credentials."
+            )
             lastException = e
             continue
     else:
@@ -184,26 +188,35 @@ def send_email(_config, recipient_list, template, alt_template=None):
 
         # attach html body
         if alt_template is None:
-            template_named = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            template_named = template.replace(
+                "{{FIRST_LASTNAME}}",
+                recipient.first_name + " " + recipient.last_name)
             msg.attach(MIMEText(template_named, "html"))
         else:
             # create multipart to store plain and html templates
             body = MIMEMultipart("alternative")
 
-            alt_templated_named = alt_template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            alt_templated_named = alt_template.replace(
+                "{{FIRST_LASTNAME}}",
+                recipient.first_name + " " + recipient.last_name)
             body.attach(MIMEText(alt_templated_named, "plain"))
 
-            template_named = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            template_named = template.replace(
+                "{{FIRST_LASTNAME}}",
+                recipient.first_name + " " + recipient.last_name)
             body.attach(MIMEText(template_named, "html"))
 
             # attach to main mixed multipart message
             msg.attach(body)
 
         # add attachment
-        assert(recipient.attachment)
+        assert (recipient.attachment)
         with recipient.attachment.open("rb") as f:
             attachment = MIMEApplication(f.read(), "pdf")
-            attachment.add_header("Content-Disposition", "attachment", filename="certificate.pdf")
+            attachment.add_header(
+                "Content-Disposition",
+                "attachment",
+                filename="certificate.pdf")
         msg.attach(attachment)
 
         # Encode email
@@ -217,22 +230,36 @@ def send_email(_config, recipient_list, template, alt_template=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", help=".ini file with configuration values to use")
-    parser.add_argument("-e", "--emails", help=".csv file (, separated) with names (col 1) and emails (col 2)")
-    parser.add_argument("-t", "--template", help="email template to use (.html)")
-    parser.add_argument("-a", "--alt_template", help="alternative (textual) template to use (.txt)", required=False)
-    parser.add_argument("-o", "--out", help="output folder where to store generated pdfs", required=True)
+    parser.add_argument(
+        "-c", "--config", help=".ini file with configuration values to use")
+    parser.add_argument(
+        "-e",
+        "--emails",
+        help=".csv file (, separated) with names (col 1) and emails (col 2)")
+    parser.add_argument(
+        "-t", "--template", help="email template to use (.html)")
+    parser.add_argument(
+        "-a",
+        "--alt_template",
+        help="alternative (textual) template to use (.txt)",
+        required=False)
+    parser.add_argument(
+        "-o",
+        "--out",
+        help="output folder where to store generated pdfs",
+        required=True)
     args = parser.parse_args()
 
     # retrieve configuration values, template
     _config = load_config(args.config)
     template = load_template(args.template)
-    alt_template = load_template(args.alt_template) if args.alt_template else None
+    alt_template = load_template(
+        args.alt_template) if args.alt_template else None
     recipient_list = load_recipients(args.emails)
 
     if args.out:
         output_folder = Path(args.out)
-        output_folder.mkdir(exist_ok =True)
+        output_folder.mkdir(exist_ok=True)
 
         for recipient in recipient_list:
             create_certificate(recipient, args.out, _config)
