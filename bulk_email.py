@@ -176,16 +176,17 @@ def send_email(_config, recipient_list, template, alt_template=None):
 
         # attach html body
         if alt_template is None:
-            template = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
-            msg.attach(MIMEText(template, "html"))
+            template_named = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            msg.attach(MIMEText(template_named, "html"))
         else:
             # create multipart to store plain and html templates
             body = MIMEMultipart("alternative")
-            template_text = template_text.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
-            body.attach(MIMEText(template_text, "plain"))
 
-            template = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
-            body.attach(MIMEText(template, "html"))
+            alt_templated_named = alt_template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            body.attach(MIMEText(alt_templated_named, "plain"))
+
+            template_named = template.replace("{{FIRST_LASTNAME}}", recipient.first_name + " " + recipient.last_name)
+            body.attach(MIMEText(template_named, "html"))
 
             # attach to main mixed multipart message
             msg.attach(body)
