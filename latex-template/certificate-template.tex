@@ -1,0 +1,99 @@
+% adapted from https://rajdeeppanesar.wordpress.com/latex/making-certificate-using-latex/
+
+\documentclass[16pt,a4paper]{scrartcl}              %class
+\usepackage[landscape,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry} %for layout
+\usepackage{setspace} % for spacing between lines
+\usepackage{graphicx}         %for including images
+
+\setlength\parindent{0pt}
+
+\usepackage{xcolor}
+\definecolor{b}{HTML}{023A68}
+\definecolor{g}{HTML}{33404C}
+
+\begin{document}
+% 		Logo's and first two lines of text
+ 		\noindent\makebox[\textwidth][c]{%
+		\begin{minipage}[c]{.2\linewidth} % b for both left and middle column are more appropriate if right figure is omitted
+			\hfill
+			\includegraphics[width=\linewidth]{../logo-template.png}  %Here include left side image
+		\end{minipage}
+		\begin{minipage}[c]{.6\linewidth}
+			{\centering
+				{\onehalfspacing
+					{\LARGE\bfseries\color{b} Event Name} \\
+%					{\LARGE\bfseries\color{b}Organization/event name}\\
+%					{\bfseries\color{red}(Additional specification/accreditation)}\\	
+				}
+			\vspace{1cm}
+				{\doublespacing
+					{\LARGE\bfseries\color{b} Certificate} \\
+					{\LARGE\bfseries\color{b} Of} \\
+					{\LARGE\bfseries\color{b} Attendence} \\
+				}
+			}
+		\end{minipage}
+		\begin{minipage}[c]{.2\linewidth}
+			\hfill
+			\includegraphics[width=\linewidth]{../logo-template.png}  %here include right side image
+		\end{minipage}
+		}
+		
+%%		second line of text
+%%		\vspace{.5cm}
+% 		\noindent\makebox[\textwidth][c]{%
+%			
+%			\begin{minipage}[b]{.2\linewidth}
+%				\hfill
+%			\end{minipage}
+%			\begin{minipage}[c]{.6\linewidth}
+%				{\centering
+%					{\doublespacing
+%						{\LARGE\bfseries\color{b} Certificate}\\
+%						{\LARGE\bfseries\color{b} Of}\\
+%						{\LARGE\bfseries\color{b} Attendence}\\
+%				}}
+%			\end{minipage}
+%			\begin{minipage}[t]{.2\linewidth}
+%				\hfill
+%			\end{minipage}
+%		}
+		
+%		\vspace{1cm}
+		\vfill
+		\doublespacing
+		{\bfseries We hereby certify that {\underline{<NAME>}} has attended the {\underline{EVENTNAME}} organized in {\underline{LOCATION}} on {\underline{DATE}}. 
+		\\~\\
+			On behalf of the organizing committee,				
+		}
+
+		{\singlespacing 
+			\vfill
+			\begin{minipage}[l]{2.8in}
+				\centering
+				\includegraphics[width=.5\linewidth]{../signature-template.png} \\
+				\vrule width 2.8in height 0.4pt\\\small \bfseries\color{g} Name \\ 
+					\bfseries\color{g} Function
+			\end{minipage}
+			\hfill
+			\begin{minipage}[c]{2.8in}
+				\centering
+				\includegraphics[width=.5\linewidth]{../signature-template.png} \\
+				\vrule width 2.8in height 0.4pt\\\small \bfseries\color{g} Name \\ 
+				\bfseries\color{g} Function
+			\end{minipage}
+			\hfill
+			\begin{minipage}[r]{2.8in}
+				\centering
+				\includegraphics[width=.5\linewidth]{../signature-template.png} \\
+				\vrule width 2.8in height 0.4pt\\\small \bfseries\color{g} Name \\ 
+				\bfseries\color{g} Function
+			\end{minipage}}
+
+		\pagebreak
+\end{document}
+
+
+
+
+

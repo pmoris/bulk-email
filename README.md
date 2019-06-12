@@ -25,7 +25,10 @@ The `config.ini` file ([example provided](example_config.ini)) should hold the n
 ### To do list
 
 - generate pdf from template instead of hard coding
-- pylatex instead of fpdf
+<!-- - pylatex instead of fpdf
+  - http://baptisteravina.com/blog/python-to-latex/
+  - https://jeltef.github.io/PyLaTeX/current/index.html
+  - https://tex.stackexchange.com/questions/5228/can-one-tex-file-output-to-multiple-pdf-files -->
 - option to skip attachments
 - option to attach existing files instead of generating (referenced in csv or based on name)
 - allow smtp without login

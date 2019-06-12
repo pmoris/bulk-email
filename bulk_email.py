@@ -23,12 +23,13 @@ import argparse
 import csv
 import getpass
 import smtplib
+import subprocess
 import time
 
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from fpdf import FPDF
+
 from pathlib import Path
 
 
@@ -53,48 +54,33 @@ def load_config(filename):
         # if not "REPLY-TO" in _config.keys():
         #     _config["REPLY-TO"] = _config["FROM"]
 
-        if not "FIRST_LASTNAME" in _config.keys():
+        if "FIRST_LASTNAME" not in _config.keys():
             _config["FIRST_LASTNAME"] = "Sir or Madam"
     return _config
 
 
-def create_certificate(recipient, output_folder, _config):
+def create_pdf_file(name, tex_template, output_folder):
+    tex_template_text = Path(tex_template).read_text()
 
-    # read values from configuration dictionary
-    event = _config["EVENT"]
-    location = _config["LOCATION"]
-    date = _config["DATE"]
-    signing_name = _config["SIGNING_NAME"]
-    signing_title = _config["SIGNING_TITLE"]
-    logo = _config["LOGO"]
-    signature = _config["SIGNATURE"]
+    # customize tex template
+    tex_named = tex_template_text.replace('<NAME>', name)
+
+    # create tex file in output folder
+    tex_out = output_folder / "{}.tex".format(name.replace(" ", ""))
+    tex_out.write_text(tex_named)
+
+    # compile latex to pdf
+    subprocess.call(["pdflatex", "-output-directory", output_folder, tex_out])
+
+
+def create_certificate(recipient, tex_template, output_folder, _config):
+
     name = recipient.first_name + " " + recipient.last_name
+    create_pdf_file(name, tex_template, output_folder)
 
-    #some basic setup
-    pdf = FPDF("P", "mm", "A4")
-    pdf.add_page()
-
-    pdf.set_font("Arial", "B", 25)
-    pdf.cell(200, 30, event, 0, 1)
-    pdf.set_font("Arial", "", 20)
-    pdf.cell(200, 10, "We hereby certify that", 0, 1)
-    pdf.set_font("Arial", "B", 20)  #bold font for name
-    pdf.cell(160, 30, "{}".format(name), 0, 1, "C")
-    pdf.set_font("Arial", "", 20)
-    pdf.cell(200, 10, "has attended the {} ".format(event), 0, 1)
-    pdf.cell(200, 10, "organized in {} on {}.".format(location, date), 0, 1)
-    pdf.cell(200, 50, "On behalf of the organizing committee,", 0, 1)
-    pdf.cell(200, 40, "", 0, 1)
-    pdf.cell(200, 10, "{}".format(signing_name), 0, 1)
-    pdf.cell(200, 10, "{}".format(signing_title), 0, 1)
-    pdf.image(logo, x=10, y=220, w=50, h=50, type="")
-    pdf.image(signature, x=10, y=145, w=50.1, h=30, type="", link="")
-
-    # create output path as: output_folder/FirstLast.pdf
-    output_path = Path(output_folder) / "{}.pdf".format(name.replace(" ", ""))
+    output_path = output_folder / "{}.tex".format(name.replace(" ", ""))
     recipient.attachment = output_path
-    print("Created .pdf file {}".format(output_path))
-    pdf.output(output_path, "F")
+    print("Created .pdf file in {}".format(output_path))
 
 
 class recipient:
@@ -224,7 +210,7 @@ def send_email(_config, recipient_list, template, alt_template=None):
         server.sendmail(msg["From"], msg["To"], encoded_email)
         print("Message sent to {}.".format(recipient.email))
 
-    # server.quit()
+    server.quit()
     print("Closed connection to mail server.")
 
 
@@ -244,24 +230,26 @@ if __name__ == "__main__":
         help="alternative (textual) template to use (.txt)",
         required=False)
     parser.add_argument(
+        "-x", "--tex", help="LaTeX template to use (.tex)")
+    parser.add_argument(
         "-o",
         "--out",
         help="output folder where to store generated pdfs",
         required=True)
     args = parser.parse_args()
 
-    # retrieve configuration values, template
+    # retrieve configuration values, templates
     _config = load_config(args.config)
-    template = load_template(args.template)
-    alt_template = load_template(
+    email_template = load_template(args.template)
+    alt_email_template = load_template(
         args.alt_template) if args.alt_template else None
     recipient_list = load_recipients(args.emails)
 
     if args.out:
-        output_folder = Path(args.out)
+        output_folder = Path(args.out).resolve()
         output_folder.mkdir(exist_ok=True)
 
         for recipient in recipient_list:
-            create_certificate(recipient, args.out, _config)
+            create_certificate(recipient, args.tex, output_folder, _config)
 
-    send_email(_config, recipient_list, template, alt_template)
+    send_email(_config, recipient_list, email_template, alt_email_template)
